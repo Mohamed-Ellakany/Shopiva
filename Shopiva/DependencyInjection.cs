@@ -1,20 +1,14 @@
-﻿
-using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
-
-
+﻿using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 namespace Shopiva
 {
     public static class DependencyInjection
     {
-        
-        
-        extension(IServiceCollection services)
-        {
-            public  IServiceCollection AddAuthenticationServices( IConfiguration configuration)
+        public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
             {
                 services.AddScoped<IAuthService, AuthService>();
-                services.AddSingleton<IJwtProvider, JwtProvider>();
-                services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+                services.AddScoped<IJwtProvider, JwtProvider>();
+            services.AddAuthorization();
+            services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
                 var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
@@ -36,26 +30,26 @@ namespace Shopiva
                             ValidateIssuerSigningKey = true,
                             ValidAudience = JwtSettings?.Audience,
                             ValidIssuer = JwtSettings?.Issuer,
-                            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtSettings?.Key!))
+                            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtSettings?.Key!)),
+
+                            NameClaimType = ClaimTypes.NameIdentifier,
+
+                            RoleClaimType = ClaimTypes.Role
                         };
                     });
                 return services;
-            }
+        }
 
-
-
-
-            public IServiceCollection AddDatabaseServices(IConfiguration configuration)
+        public static IServiceCollection AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
             {
                 services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(
                         configuration.GetConnectionString("DefaultConnection")));
 
                 return services;
-            }
+        }
 
-
-            public  IServiceCollection AddIdentityServices(IConfiguration configuration)
+        public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
             {
 
                 services
@@ -79,21 +73,26 @@ namespace Shopiva
                     options.SignIn.RequireConfirmedPhoneNumber = false;
 
                 });
-                return services;
 
-            }
 
-            public  IServiceCollection AddSwaggerServices(IConfiguration configuration)
-            {
-                services.AddSwaggerGen();
+
+
                 return services;
-            }
         }
 
-        
+        public static IServiceCollection AddSwaggerServices(this IServiceCollection services, IConfiguration configuration)
+                {
+                    services.AddSwaggerGen();
+                    return services;
+                }
 
-       
-       
-
-    }
+                public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
+                {
+                    services.AddScoped<IProductService, ProductService>();
+                    services.AddScoped<ICategoryService, CategoryService>();
+                    services.AddScoped<IReviewService, ReviewService>();
+                    services.AddScoped<IImageService, ImageService>();
+                    return services;
+                }
+            }
 }

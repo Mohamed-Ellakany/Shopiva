@@ -108,10 +108,9 @@ namespace Shopiva.Services
 
         private async Task<AuthResponse> GetToken(ApplicationUser user)
         {
-            // jwt 
-            var (token, expireIn) = _jwtProvider.GenerateJwtToken(user);
+            
+            var (token, expireIn) =await _jwtProvider.GenerateJwtTokenAsync(user);
 
-            //refresh token
             var refreshToken = GenerateRefreshToken();
             var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
 

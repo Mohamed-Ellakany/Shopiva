@@ -3,7 +3,7 @@ namespace Shopiva.Interfaces
 {
     public interface IJwtProvider
     {
-        (string token , int expireIn) GenerateJwtToken(ApplicationUser user);
+        Task<(string token, int expireIn)> GenerateJwtTokenAsync(ApplicationUser user);
         string? ValidateToken(string token);
     }
 }

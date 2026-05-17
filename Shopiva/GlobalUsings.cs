@@ -4,8 +4,11 @@ global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Mvc;
 
-
+global using Shopiva.Contracts.Reviews;
+global using Shopiva.Contracts.Products;
 global using Shopiva.Abstractions;
 global using Shopiva.Abstractions.consts;
 global using Shopiva.Contracts.Auth;
