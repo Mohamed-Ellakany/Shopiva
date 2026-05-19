@@ -9,7 +9,8 @@
         string Token,
         int ExpiresIn,
         string RefreshToken,
-        DateTime RefreshTokenExpiration
+        DateTime RefreshTokenExpiration,
+        List<string> Roles
         );
     
 }

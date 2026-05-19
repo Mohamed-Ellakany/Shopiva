@@ -31,7 +31,7 @@ namespace Shopiva.Services
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (category is null)
-                return Result.Failure<CategoryResponseDto>(new Error("Category Not Found", "Category not found"));
+                return Result.Failure<CategoryResponseDto>(UserErrors.CategoryNotFound);
 
             return Result<CategoryResponseDto>.Success(MapToDto(category));
         }
@@ -42,7 +42,7 @@ namespace Shopiva.Services
                 .AnyAsync(c => c.Name.ToLower() == dto.Name.ToLower());
 
             if (nameExists)
-                return Result.Failure<CategoryResponseDto>(new Error("Category Already Exists", "A category with this name already exists"));
+                return Result.Failure<CategoryResponseDto>(UserErrors.CategoryAlreadyExists);
 
             var category = new Category
             {
@@ -54,7 +54,7 @@ namespace Shopiva.Services
             {
                 var uploadResult = await _imageService.UploadAsync(dto.Image, "categories");
                 if (!uploadResult.IsSuccess)
-                    return Result.Failure<CategoryResponseDto>(new Error("Image Upload Failed", "Failed to upload category image"));
+                    return Result.Failure<CategoryResponseDto>(UserErrors.ImageUploadFailed);
 
                 category.ImageUrl = uploadResult.Value;
             }
@@ -72,7 +72,7 @@ namespace Shopiva.Services
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (category is null)
-                return Result.Failure<CategoryResponseDto>(new Error("Category Not Found", "Category not found"));
+                return Result.Failure<CategoryResponseDto>(UserErrors.CategoryNotFound);
 
             // Name uniqueness (exclude self)
             if (dto.Name is not null)
@@ -81,7 +81,7 @@ namespace Shopiva.Services
                     .AnyAsync(c => c.Name.ToLower() == dto.Name.ToLower() && c.Id != id);
 
                 if (nameExists)
-                    return Result.Failure<CategoryResponseDto>(new Error("Category Already Exists", "A category with this name already exists"));
+                    return Result.Failure<CategoryResponseDto>(UserErrors.CategoryAlreadyExists);
 
                 category.Name = dto.Name;
             }
@@ -103,7 +103,7 @@ namespace Shopiva.Services
 
                 var uploadResult = await _imageService.UploadAsync(dto.Image, "categories");
                 if (!uploadResult.IsSuccess)
-                    return Result.Failure<CategoryResponseDto>(new Error("Image Upload Failed", "Failed to upload category image"));
+                    return Result.Failure<CategoryResponseDto>(UserErrors.ImageUploadFailed);
 
                 category.ImageUrl = uploadResult.Value;
             }
@@ -120,10 +120,10 @@ namespace Shopiva.Services
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (category is null)
-                return Result.Failure<bool>(new Error("Category Not Found", "Category not found"));
+                return Result.Failure<bool>(UserErrors.CategoryNotFound);
 
             if (category.Products.Any(p => p.IsActive))
-                return Result.Failure<bool>(new Error("Cannot Delete Category", "Cannot delete a category that has active products. Reassign or remove them first"));
+                return Result.Failure<bool>(UserErrors.CategoryHasActiveProducts);
 
             // Delete image from wwwroot if exists
             if (category.ImageUrl is not null)

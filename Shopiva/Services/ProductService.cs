@@ -85,7 +85,7 @@ public class ProductService(AppDbContext context, IImageService imageService) : 
             .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
 
         if (product is null)
-            return Result.Failure<ProductResponseDto>(new Error("product Not Found","Product not found"));
+            return Result.Failure<ProductResponseDto>(UserErrors.ProductNotFound);
 
         return Result<ProductResponseDto>.Success(MapToDto(product));
     }
@@ -94,7 +94,7 @@ public class ProductService(AppDbContext context, IImageService imageService) : 
     {
         var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
         if (!categoryExists)
-            return Result.Failure<ProductResponseDto>(new Error("Category Not Found", "Category not found"));
+            return Result.Failure<ProductResponseDto>(UserErrors.CategoryNotFound);
 
         var product = new Product
         {
@@ -114,7 +114,7 @@ public class ProductService(AppDbContext context, IImageService imageService) : 
             {
                 var uploadedResult = await _imageService.UploadAsync(image);
                 if (!uploadedResult.IsSuccess)
-                    return Result.Failure<ProductResponseDto>(new Error("Image Upload Failed", "Failed to upload product image"));
+                    return Result.Failure<ProductResponseDto>(UserErrors.ImageUploadFailed);
 
                 product.Images.Add(new ProductImage { Url = uploadedResult.Value, IsMain = isFirst });
                 isFirst = false;
@@ -139,10 +139,10 @@ public class ProductService(AppDbContext context, IImageService imageService) : 
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product is null)
-            return Result.Failure<ProductResponseDto>(new Error("Product Not Found", "Product not found"));
+            return Result.Failure<ProductResponseDto>(UserErrors.ProductNotFound);
 
         if (product.SellerId != sellerId)
-            return Result.Failure<ProductResponseDto>(new Error("Unauthorized", "Unauthorized"));
+            return Result.Failure<ProductResponseDto>(UserErrors.UnauthorizedAccess);
 
         if (dto.Name is not null) product.Name = dto.Name;
         if (dto.Description is not null) product.Description = dto.Description;
@@ -170,7 +170,7 @@ public class ProductService(AppDbContext context, IImageService imageService) : 
             {
                 var uploadedResult = await _imageService.UploadAsync(image);
                 if (!uploadedResult.IsSuccess)
-                    return Result.Failure<ProductResponseDto>(new Error("Image Upload Failed", "Failed to upload product image"));
+                    return Result.Failure<ProductResponseDto>(UserErrors.ImageUploadFailed);
 
                 product.Images.Add(new ProductImage
                 {
@@ -191,10 +191,10 @@ public class ProductService(AppDbContext context, IImageService imageService) : 
         var product = await _context.Products.FindAsync(id);
 
         if (product is null)
-            return Result.Failure<bool>(new Error("Product Not Found", "Product not found"));
+            return Result.Failure<bool>(UserErrors.ProductNotFound);
 
         if (!isAdmin && product.SellerId != sellerId)
-            return Result.Failure<bool>(new Error("Unauthorized", "Unauthorized")   );
+            return Result.Failure<bool>(UserErrors.UnauthorizedAccess);
 
         // Soft delete
         product.IsActive = false;
@@ -209,10 +209,10 @@ public class ProductService(AppDbContext context, IImageService imageService) : 
         var product = await _context.Products.FindAsync(id);
 
         if (product is null)
-            return Result.Failure<bool>(new Error("Product Not Found", "Product not found"));
+            return Result.Failure<bool>(UserErrors.ProductNotFound);
 
         if (product.Stock < quantity)
-            return Result.Failure<bool>(new Error("Insufficient Stock", "Insufficient stock"));
+            return Result.Failure<bool>(UserErrors.InsufficientStock);
 
         product.Stock -= quantity;
         await _context.SaveChangesAsync();

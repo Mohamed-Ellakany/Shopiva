@@ -22,7 +22,7 @@ namespace Shopiva.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _categoryService.GetByIdAsync(id);
-            return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status404NotFound);
         }
 
         [HttpPost]
@@ -32,7 +32,7 @@ namespace Shopiva.Controllers
             var result = await _categoryService.CreateAsync(dto);
             return result.IsSuccess
                 ? CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value)
-                : BadRequest(result.Error);
+                : result.ToProblem(StatusCodes.Status400BadRequest);
         }
 
         [HttpPut("{id}")]
@@ -40,7 +40,7 @@ namespace Shopiva.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDto dto)
         {
             var result = await _categoryService.UpdateAsync(id, dto);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status400BadRequest);
         }
 
         [HttpDelete("{id}")]
@@ -48,7 +48,7 @@ namespace Shopiva.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _categoryService.DeleteAsync(id);
-            return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+            return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status400BadRequest);
         }
 
     }
