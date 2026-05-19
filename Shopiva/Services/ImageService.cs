@@ -1,54 +1,65 @@
 ﻿namespace Shopiva.Services
 {
-    public class ImageService : IImageService
+    public class ImageService(IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor) : IImageService
     {
-        private readonly string _uploadsPath;
-        private readonly string _baseUrl;
+        private readonly string _uploadsPath = Path.Combine(env.WebRootPath, "uploads");
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-        public ImageService(IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor)
+  
+        private string BaseUrl
         {
-            _uploadsPath = Path.Combine(env.WebRootPath, "uploads");
+            get
+            {
+                var request = _httpContextAccessor.HttpContext!.Request;
+                return $"{request.Scheme}://{request.Host}";
+            }
+        }
 
+        public ImageService(IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, bool _)
+            : this(env, httpContextAccessor)
+        {
             Directory.CreateDirectory(Path.Combine(_uploadsPath, "products"));
             Directory.CreateDirectory(Path.Combine(_uploadsPath, "categories"));
+        }
 
-            var request = httpContextAccessor.HttpContext!.Request;
-            _baseUrl = $"{request.Scheme}://{request.Host}";
-
+        private void EnsureDirectories()
+        {
+            Directory.CreateDirectory(Path.Combine(_uploadsPath, "products"));
+            Directory.CreateDirectory(Path.Combine(_uploadsPath, "categories"));
         }
 
         public async Task<Result<string>> UploadAsync(IFormFile file, string folder = "products")
         {
+            EnsureDirectories();
+
             var validationError = ValidateFile(file);
             if (validationError is not null)
-                return Result.Failure<string>(new Error("Invalid File", validationError));
+                return Result.Failure<string>(new Error("InvalidFile", validationError));
 
             var fileName = GenerateFileName(file.FileName);
-            var folderPath = Path.Combine(_uploadsPath, folder);
-            var filePath = Path.Combine(folderPath, fileName);
+            var filePath = Path.Combine(_uploadsPath, folder, fileName);
 
             await using var stream = new FileStream(filePath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            var url = $"{_baseUrl}/uploads/{folder}/{fileName}";
+            var url = $"{BaseUrl}/uploads/{folder}/{fileName}";
             return Result<string>.Success(url);
         }
 
         public async Task<Result<List<string>>> UploadManyAsync(List<IFormFile> files, string folder = "products")
         {
             if (files.Count == 0)
-                return Result.Failure<List<string>>(new Error("No Images", "No files provided"));
+                return Result.Failure<List<string>>(UserErrors.NoImages);
 
             if (files.Count > 10)
-                return Result.Failure<List<string>>(new Error("Max Images","Maximum 10 images allowed"));
+                return Result.Failure<List<string>>(UserErrors.MaxImages);
 
             var urls = new List<string>();
-
             foreach (var file in files)
             {
                 var result = await UploadAsync(file, folder);
                 if (!result.IsSuccess)
-                    return Result.Failure<List<string>>( result.Error!);
+                    return Result.Failure<List<string>>(result.Error!);
 
                 urls.Add(result.Value!);
             }
@@ -61,23 +72,19 @@
             try
             {
                 var filePath = UrlToFilePath(url);
-
                 if (filePath is null || !File.Exists(filePath))
-                    return Task.FromResult(Result.Failure<bool>(new Error("File not found", "File not found")));
+                    return Task.FromResult(Result.Failure<bool>(UserErrors.ImageUploadFailed));
 
                 File.Delete(filePath);
                 return Task.FromResult(Result<bool>.Success(true));
             }
             catch (Exception ex)
             {
-                return Task.FromResult(Result.Failure<bool>(new Error("Failed to delete file", $"Failed to delete file: {ex.Message}")));
+                return Task.FromResult(Result.Failure<bool>(new Error("DeleteFailed", $"Failed to delete file: {ex.Message}")));
             }
         }
 
-        // ──────────────────────────────────────────
-        // Helpers
-        // ──────────────────────────────────────────
-
+      
         private static string? ValidateFile(IFormFile file)
         {
             if (file.Length == 0)
@@ -87,7 +94,7 @@
             if (!allowedTypes.Contains(file.ContentType.ToLower()))
                 return "Only JPEG, PNG, and WebP images are allowed";
 
-            const long maxSize = 5 * 1024 * 1024; // 5MB
+            const long maxSize = 5 * 1024 * 1024;
             if (file.Length > maxSize)
                 return "Image must be less than 5MB";
 
@@ -100,17 +107,12 @@
             return $"{Guid.NewGuid()}{extension}";
         }
 
-        // Converts "https://localhost:5001/uploads/products/abc.jpg"
-        //       → "C:/project/wwwroot/uploads/products/abc.jpg"
         private string? UrlToFilePath(string url)
         {
             try
             {
                 var uri = new Uri(url);
-                // uri.AbsolutePath → "/uploads/products/abc.jpg"
                 var relativePath = uri.AbsolutePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-
-                // relativePath starts with "uploads/..." — map to wwwroot
                 var wwwrootParent = Directory.GetParent(_uploadsPath)!.FullName;
                 return Path.Combine(wwwrootParent, relativePath);
             }

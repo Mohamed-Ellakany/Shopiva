@@ -17,6 +17,7 @@ global using Shopiva.Models;
 global using Shopiva.Data;
 global using Shopiva.JWT;
 global using Shopiva.Services;
+global using Shopiva.Contracts.Categories;
 
 
 global using System.IdentityModel.Tokens.Jwt;

@@ -10,14 +10,14 @@
         public async Task<IActionResult> GetAll([FromQuery] ProductFilterDto filter)
         {
             var result = await _productService.GetAllAsync(filter);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status400BadRequest);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _productService.GetByIdAsync(id);
-            return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status404NotFound);
         }
 
 
@@ -29,7 +29,7 @@
             var result = await _productService.CreateAsync(dto, sellerId);
             return result.IsSuccess
                 ? CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value)
-                : BadRequest(result.Error);
+                : result.ToProblem(StatusCodes.Status400BadRequest);
         }
 
         [HttpPut("{id}")]
@@ -38,7 +38,7 @@
         {
             var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var result = await _productService.UpdateAsync(id, dto, sellerId);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status400BadRequest);
         }
 
         [HttpDelete("{id}")]
@@ -48,7 +48,7 @@
             var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var isAdmin = User.IsInRole("Admin");
             var result = await _productService.DeleteAsync(id, sellerId, isAdmin);
-            return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+            return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status400BadRequest);
         }
     }
 }
