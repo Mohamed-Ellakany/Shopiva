@@ -1,43 +1,51 @@
-﻿using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.OpenApi;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using Shopiva.Interfaces.Cart;
+using Shopiva.Interfaces.Redis;
+using Shopiva.Interfaces.UnitOfWork;
+using StackExchange.Redis;
+
 namespace Shopiva
 {
     public static class DependencyInjection
     {
         public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
-            {
-                services.AddScoped<IAuthService, AuthService>();
-                services.AddScoped<IJwtProvider, JwtProvider>();
+        {
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddAuthorization();
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
-                var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+            var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
 
-                services.AddAuthentication(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            })
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidAudience = JwtSettings?.Audience,
+                    ValidIssuer = JwtSettings?.Issuer,
+                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtSettings?.Key!)),
 
-                })
-                    .AddJwtBearer(options =>
-                    {
-                        options.SaveToken = true;
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            ValidateLifetime = true,
-                            ValidateIssuerSigningKey = true,
-                            ValidAudience = JwtSettings?.Audience,
-                            ValidIssuer = JwtSettings?.Issuer,
-                            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtSettings?.Key!)),
+                    NameClaimType = ClaimTypes.NameIdentifier,
 
-                            NameClaimType = ClaimTypes.NameIdentifier,
+                    RoleClaimType = ClaimTypes.Role
+                };
+            });
 
-                            RoleClaimType = ClaimTypes.Role
-                        };
-                    });
-                return services;
+            return services;
         }
 
         public static IServiceCollection AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
@@ -50,49 +58,127 @@ namespace Shopiva
         }
 
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
+        {
+
+            services
+                .AddFluentValidationAutoValidation()
+                .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.Configure<IdentityOptions>(options =>
             {
-
-                services
-                    .AddFluentValidationAutoValidation()
-                    .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
-                services.AddIdentity<ApplicationUser, IdentityRole>()
-                    .AddEntityFrameworkStores<AppDbContext>()
-                    .AddDefaultTokenProviders();
-
-                services.Configure<IdentityOptions>(options =>
-                {
-                    options.Password.RequireDigit = true;
-                    options.Password.RequireLowercase = true;
-                    options.Password.RequireNonAlphanumeric = false;
-                    options.Password.RequireUppercase = true;
-                    options.Password.RequiredLength = 8;
-                    options.Password.RequiredUniqueChars = 1;
-                    options.User.RequireUniqueEmail = true;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 1;
+                options.User.RequireUniqueEmail = true;
                     options.SignIn.RequireConfirmedEmail = false;
                     options.SignIn.RequireConfirmedPhoneNumber = false;
 
-                });
+            });
 
 
-
-
-                return services;
+            return services;
         }
 
         public static IServiceCollection AddSwaggerServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSwaggerGen(options=>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    services.AddSwaggerGen();
-                    return services;
-                }
+                    Title = "My API",
+                    Version = "v1"
+                });
 
-                public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    services.AddScoped<IProductService, ProductService>();
-                    services.AddScoped<ICategoryService, CategoryService>();
-                    services.AddScoped<IReviewService, ReviewService>();
-                    services.AddScoped<IImageService, ImageService>();
-                    return services;
-                }
-            }
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter your token"
+                });
+
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("bearer", document)] = []
+                });
+            });
+            return services;
+        }
+
+        //public static IServiceCollection AddRedisService(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    var redisSection = configuration.GetSection("Redis");
+
+        //    var configOptions = new ConfigurationOptions
+        //    {
+        //        EndPoints = { { redisSection["Host"]!, int.Parse(redisSection["Port"]!) } },
+        //        User = redisSection["User"],
+        //        Password = redisSection["Password"],
+        //        AbortOnConnectFail = false,   // ← don't crash app if Redis is down
+        //        ConnectTimeout = 5000,
+        //        SyncTimeout = 5000,
+        //    };
+
+        //    var multiplexer = ConnectionMultiplexer.Connect(configOptions);
+        //    services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+        //    services.AddScoped<IRedisService, RedisService>();
+
+        //    // ── Health Check ───────────────────────────────────────────
+        //    services.AddHealthChecks()
+        //        .AddCheck("redis", () =>
+        //        {
+        //            try
+        //            {
+        //                var db = multiplexer.GetDatabase();
+        //                db.Ping();
+        //                return HealthCheckResult.Healthy("Redis is reachable.");
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                return HealthCheckResult.Unhealthy("Redis is unreachable.", ex);
+        //            }
+        //        });
+
+        //    return services;
+        //}
+
+        public static IServiceCollection AddRedisService(this IServiceCollection services, IConfiguration configuration)
+        {
+
+
+            var redisSection = configuration.GetSection("Redis");
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(
+                    new ConfigurationOptions
+                    {
+                        EndPoints = { { redisSection["Host"]!, int.Parse(redisSection["Port"]!) } },
+                        User = redisSection["User"],
+                        Password = redisSection["Password"],
+                        AbortOnConnectFail = false,
+                    }
+            ));
+
+            return services;
+        }
+
+        public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
+            services.AddScoped<IRedisService, RedisService>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<ICartService, CartService>();
+            return services;
+        }
+    }
 }

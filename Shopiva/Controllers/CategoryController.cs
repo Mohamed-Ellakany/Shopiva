@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Shopiva.Contracts.Categories;
-
-namespace Shopiva.Controllers
+﻿namespace Shopiva.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

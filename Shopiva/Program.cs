@@ -18,6 +18,8 @@ namespace Shopiva
 
             builder.Services.AddIdentityServices(builder.Configuration);
 
+            builder.Services.AddRedisService(builder.Configuration);
+
             builder.Services.AddAppServices(builder.Configuration);
 
             builder.Services.AddSwaggerServices(builder.Configuration);
@@ -32,11 +34,12 @@ namespace Shopiva
                 });
             });
 
-       
 
             var app = builder.Build();
 
 
+
+            app.MapHealthChecks("/health");
 
             using (var scope = app.Services.CreateScope())
             {

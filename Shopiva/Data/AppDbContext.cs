@@ -1,7 +1,4 @@
-﻿
-using System.Reflection;
-
-namespace Shopiva.Data
+﻿namespace Shopiva.Data
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
@@ -36,7 +33,22 @@ namespace Shopiva.Data
                     .OnDelete(DeleteBehavior.Cascade);
 
 
+            builder.Entity<Cart>(e =>
+            {
+                e.HasKey(c => c.Id);
+                e.HasOne(c => c.User)
+                 .WithOne(u => u.Cart)
+                 .HasForeignKey<Cart>(c => c.UserId);
+            });
 
+            builder.Entity<CartItem>(e =>
+            {
+                e.HasKey(ci => ci.Id);
+                e.HasOne(ci => ci.Cart)
+                 .WithMany(c => c.Items)
+                 .HasForeignKey(ci => ci.CartId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
 
             builder.Entity<IdentityRole>().HasData(
                   new IdentityRole
@@ -69,7 +81,8 @@ namespace Shopiva.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Review> Reviews { get; set; }
-
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
     }
 }

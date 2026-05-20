@@ -13,6 +13,7 @@ namespace Shopiva.Models
         public string? ProfileImageUrl { get; set; }
         public List<RefreshTokens> RefreshTokens { get; set; } = [];
 
+        public Cart? Cart { get; set; }
     }
 }
 

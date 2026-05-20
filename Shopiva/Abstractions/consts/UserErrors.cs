@@ -29,5 +29,14 @@
         public static readonly Error ProductNotFound = new Error("Product.NotFound", "Product not found");
         public static readonly Error InsufficientStock = new Error("Product.InsufficientStock", "Insufficient stock");
 
+
+        //Cart Errors
+        public static readonly Error CartNotFound = new Error("Cart NotFound", "Cart not found");
+        public static readonly Error CartItemNotFound = new Error("CartItem NotFound", "Cart item not found");
+        public static readonly Error CartItemQuantityLessThanZero = new Error("CartItem Invalid", "Quantity must be greater than zero");
+
+        // General
+        public static readonly Error ProblemOccured = new Error("Error", "An error occured");
+
     }
 }

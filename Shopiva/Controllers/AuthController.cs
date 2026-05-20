@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace Shopiva.Controllers
+﻿namespace Shopiva.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
