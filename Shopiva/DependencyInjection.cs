@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using Shopiva.Abstractions.Options;
 using Shopiva.Interfaces.Cart;
 using Shopiva.Interfaces.Redis;
 using Shopiva.Interfaces.UnitOfWork;
@@ -77,7 +78,7 @@ namespace Shopiva
                 options.Password.RequiredLength = 8;
                 options.Password.RequiredUniqueChars = 1;
                 options.User.RequireUniqueEmail = true;
-                    options.SignIn.RequireConfirmedEmail = false;
+                    options.SignIn.RequireConfirmedEmail = true;
                     options.SignIn.RequireConfirmedPhoneNumber = false;
 
             });
@@ -166,6 +167,13 @@ namespace Shopiva
                     }
             ));
 
+            return services;
+        }
+
+        public static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
 

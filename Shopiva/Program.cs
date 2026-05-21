@@ -18,6 +18,8 @@ namespace Shopiva
 
             builder.Services.AddIdentityServices(builder.Configuration);
 
+            builder.Services.AddEmailServices(builder.Configuration);
+
             builder.Services.AddRedisService(builder.Configuration);
 
             builder.Services.AddAppServices(builder.Configuration);
@@ -39,7 +41,7 @@ namespace Shopiva
 
 
 
-            app.MapHealthChecks("/health");
+            //app.MapHealthChecks("/health");
 
             using (var scope = app.Services.CreateScope())
             {
