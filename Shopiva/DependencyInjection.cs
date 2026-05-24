@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.OpenApi;
+﻿using Microsoft.OpenApi;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using Shopiva.Abstractions.Options;
 using Shopiva.Interfaces.Cart;
 using Shopiva.Interfaces.Redis;
-using Shopiva.Interfaces.UnitOfWork;
 using StackExchange.Redis;
 
 namespace Shopiva
@@ -188,6 +186,7 @@ namespace Shopiva
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IAdminService, AdminService>();
 
             return services;
         }
