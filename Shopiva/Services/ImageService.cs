@@ -26,6 +26,8 @@
         {
             Directory.CreateDirectory(Path.Combine(_uploadsPath, "products"));
             Directory.CreateDirectory(Path.Combine(_uploadsPath, "categories"));
+            Directory.CreateDirectory(Path.Combine(_uploadsPath, "avatars")); 
+
         }
 
         public async Task<Result<string>> UploadAsync(IFormFile file, string folder = "products")
