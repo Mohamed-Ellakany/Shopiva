@@ -13,7 +13,8 @@
                     UserName = "admin",
                     Email = "admin@example.com",
                     FirstName = "Admin",
-                    LastName = "User"
+                    LastName = "User",
+                    EmailConfirmed=true
                 };
 
                 await userManager.CreateAsync(admin, "Admin@123");
