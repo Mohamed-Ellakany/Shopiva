@@ -38,5 +38,20 @@
         // General
         public static readonly Error ProblemOccured = new Error("Error", "An error occured");
 
+
+        // OTP
+        public static readonly Error OtpInvalidOrExpired = new("Otp.InvalidOrExpired", "OTP is invalid or has expired.");
+        public static readonly Error OtpTooManyAttempts = new("Otp.TooManyAttempts", "Too many failed attempts. Please request a new OTP.");
+
+
+
+
+        // Profile Errors
+        public static readonly Error PhoneAlreadyInUse =
+       new("User.PhoneAlreadyInUse", "This phone number is already associated with another account.");
+
+        public static readonly Error WrongCurrentPassword =
+            new("User.WrongCurrentPassword", "The current password you entered is incorrect.");
+
     }
 }

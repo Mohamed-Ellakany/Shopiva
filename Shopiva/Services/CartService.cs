@@ -131,12 +131,12 @@ namespace Shopiva.Services
 
         public async Task<Result> ClearCartAsync(string userId, CancellationToken ct = default)
         {
-            var cart = await _unitOfWork.Carts.GetActiveCartWithItemsAsync(userId, ct);
+            var cart = await _unitOfWork.Carts.GetActiveCartWithItemsTrackedAsync(userId, ct);
             if (cart is null)
                 return Result.Failure<bool>(UserErrors.CartNotFound);
 
             cart.Items.Clear();
-            _unitOfWork.Carts.Update(cart);
+
             await _unitOfWork.SaveChangesAsync(ct);
 
             await _redis.DeleteAsync($"cart:{userId}");
