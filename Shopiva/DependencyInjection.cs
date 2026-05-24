@@ -186,6 +186,9 @@ namespace Shopiva
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IProfileService, ProfileService>();
+
             return services;
         }
     }
