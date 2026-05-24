@@ -7,6 +7,7 @@ global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 
+global using Shopiva.Contracts.AdminPanel;
 global using Shopiva.Contracts.Profiles;
 global using Shopiva.Abstractions.consts;
 global using Shopiva.Abstractions.enums;
