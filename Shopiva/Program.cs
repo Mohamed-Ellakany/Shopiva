@@ -39,7 +39,7 @@ namespace Shopiva
 
 
 
-            app.MapHealthChecks("/health");
+            //app.MapHealthChecks("/health");
 
             using (var scope = app.Services.CreateScope())
             {
