@@ -71,8 +71,8 @@ namespace Shopiva
             services.AddIdentityCore<ApplicationUser>()
                     .AddRoles<IdentityRole>()
                     .AddEntityFrameworkStores<AppDbContext>()
-                    .AddDefaultTokenProviders()
-                    .AddSignInManager();
+                    .AddDefaultTokenProviders();
+
 
             services.Configure<IdentityOptions>(options =>
             {

@@ -6,13 +6,11 @@ namespace Shopiva.Services
 {
     public class AuthService(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
         IJwtProvider jwtProvider,
         IEmailService emailService,
         IRedisService redisService) : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
         private readonly IJwtProvider _jwtProvider = jwtProvider;
         private readonly IEmailService _emailService = emailService;
         private readonly IRedisService _redisService = redisService;
@@ -28,9 +26,14 @@ namespace Shopiva.Services
             if (user is null)
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-            var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
-            if (!result.Succeeded)
+            if (!await _userManager.CheckPasswordAsync(user, password))
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
+
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+                return Result.Failure<AuthResponse>(UserErrors.EmailNotConfirmed);
+
+            if (await _userManager.IsLockedOutAsync(user))
+                return Result.Failure<AuthResponse>(UserErrors.AccountLockedOut);
 
             var response = await GetTokenAsync(user);
             return Result.Success(response);

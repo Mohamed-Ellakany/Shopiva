@@ -10,6 +10,8 @@
         public static readonly Error InvalidOperation = new Error("Invalid.Operation", "Invaild operation try again.");
         public static readonly Error WeakPassword = new Error("User.WeakPassword", "The provided password does not meet the security requirements.");
         public static readonly Error UnauthorizedAccess = new Error("Access.Unauthorized", "You do not have permission to access this resource.");
+        public static readonly Error EmailNotConfirmed = new Error("Access.Denied", "The email is not confirmed yet.");
+        public static readonly Error AccountLockedOut = new Error("Access.Denied", "The account is locked out.");
 
 
 
