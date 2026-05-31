@@ -25,6 +25,7 @@ namespace Shopiva.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+        public Payment? Payment { get; set; }
 
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
         public ICollection<OrderStatusHistory> StatusHistory { get; set; } = new List<OrderStatusHistory>();
