@@ -6,24 +6,15 @@ namespace Shopiva
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
-
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddDatabaseServices(builder.Configuration);
-
             builder.Services.AddAuthenticationServices(builder.Configuration);
-
             builder.Services.AddIdentityServices(builder.Configuration);
-
             builder.Services.AddEmailServices(builder.Configuration);
-
             builder.Services.AddRedisService(builder.Configuration);
-
             builder.Services.AddAppServices(builder.Configuration);
-
             builder.Services.AddSwaggerServices(builder.Configuration);
 
             builder.Services.AddCors(options =>
@@ -36,12 +27,7 @@ namespace Shopiva
                 });
             });
 
-
             var app = builder.Build();
-
-
-
-            //app.MapHealthChecks("/health");
 
             using (var scope = app.Services.CreateScope())
             {
@@ -49,21 +35,17 @@ namespace Shopiva
                 await SeedAdmin.SeedAsync(userManager);
             }
 
-
             app.UseSwagger();
             app.UseSwaggerUI();
-            // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
-            
+
+            // ⚠️ الترتيب مهم جداً
+            app.UseCors("PublicPolicy");      // 1️⃣ CORS أول
             app.MapStaticAssets();
-            app.UseRouting();
-
-            app.UseCors("PublicPolicy");
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
+            app.UseRouting();                  // 2️⃣ Routing
+            app.UseAuthentication();           // 3️⃣ Authentication
+            app.UseAuthorization();            // 4️⃣ Authorization
 
             app.MapControllers();
 

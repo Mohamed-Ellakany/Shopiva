@@ -17,6 +17,13 @@ namespace Shopiva
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
             var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngular", policy =>
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+            });
 
 
             services.AddAuthentication(options =>
