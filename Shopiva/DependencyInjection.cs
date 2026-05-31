@@ -195,7 +195,10 @@ namespace Shopiva
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<ISellerService, SellerService>();
+
             services.AddScoped<IPaymentService, PaymentService>();
+
+            services.AddScoped<IDashboardService, DashboardService>();
 
             return services;
         }
