@@ -40,13 +40,15 @@ namespace Shopiva
 
             app.UseHttpsRedirection();
 
-            // order is very important
+           
 
-            app.UseCors("PublicPolicy");      // 1️ CORS
+            app.UseCors("PublicPolicy");      
             app.MapStaticAssets();
-            app.UseRouting();                  // 2️ Routing
-            app.UseAuthentication();           // 3️ Authentication
-            app.UseAuthorization();            // 4️ Authorization
+            app.UseRouting();                 
+            app.UseAuthentication();           
+            app.UseAuthorization();            
+
+           
 
             app.MapControllers();
 
