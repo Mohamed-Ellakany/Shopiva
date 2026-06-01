@@ -36,16 +36,17 @@ namespace Shopiva
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var httpContextAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
 
                 // Seed admin and users with roles
                 await SeedAdmin.SeedAsync(userManager);
                 await SeedUsers.SeedAsync(userManager, roleManager);
 
                 // Seed categories
-                await SeedCategories.SeedAsync(dbContext);
+                await SeedCategories.SeedAsync(dbContext, httpContextAccessor);
 
                 // Seed products after users and categories are created
-                await SeedProducts.SeedAsync(userManager, dbContext);
+                await SeedProducts.SeedAsync(userManager, dbContext, httpContextAccessor);
             }
 
             app.UseSwagger();
