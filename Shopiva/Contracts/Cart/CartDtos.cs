@@ -7,7 +7,7 @@ namespace Shopiva.Contracts.Cart
 
     public record CartItemDto(
         int Id,
-        int ProductId,
+        ProductCartDto Product,
         int Quantity,
         decimal UnitPrice,
         decimal Subtotal
