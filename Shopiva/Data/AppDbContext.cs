@@ -110,6 +110,16 @@ namespace Shopiva.Data
                     ConcurrencyStamp = "a1b2c3d4-0003-0000-0000-000000000033"
                 }
             );
+
+            // ── Users Seed ──
+            // Users are seeded via UserManager in Program.cs (SeedUsers.cs)
+            // This approach is better for Identity user management and role assignment
+
+            // ── Categories Seed ──
+            // Categories are seeded programmatically in Program.cs (SeedCategories.cs)
+
+            // ── Products Seed ──
+            // Products are seeded programmatically in Program.cs to resolve seller user IDs
         }
 
         public DbSet<Order> Orders { get; set; }

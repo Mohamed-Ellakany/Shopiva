@@ -1,3 +1,5 @@
+using Shopiva.Seeding;
+
 namespace Shopiva
 {
     public class Program
@@ -32,7 +34,18 @@ namespace Shopiva
             using (var scope = app.Services.CreateScope())
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                // Seed admin and users with roles
                 await SeedAdmin.SeedAsync(userManager);
+                await SeedUsers.SeedAsync(userManager, roleManager);
+
+                // Seed categories
+                await SeedCategories.SeedAsync(dbContext);
+
+                // Seed products after users and categories are created
+                await SeedProducts.SeedAsync(userManager, dbContext);
             }
 
             app.UseSwagger();
@@ -40,15 +53,11 @@ namespace Shopiva
 
             app.UseHttpsRedirection();
 
-           
-
             app.UseCors("PublicPolicy");      
             app.MapStaticAssets();
             app.UseRouting();                 
             app.UseAuthentication();           
             app.UseAuthorization();            
-
-           
 
             app.MapControllers();
 
