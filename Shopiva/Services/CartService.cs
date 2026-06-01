@@ -154,8 +154,9 @@ namespace Shopiva.Services
                     i.Product.Id,
                     i.Product.Name,
                     i.Product.Price,
+                    i.Product.Stock,
                     i.Product.DiscountedPrice,
-                    i.Product.Images?.FirstOrDefault()
+                    i.Product.Images.FirstOrDefault()?.Url
                 ),
                 i.Quantity,
                 i.UnitPrice,

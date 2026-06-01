@@ -4,7 +4,8 @@
         int Id,
         string Name,
         decimal Price,
+        int Stock,
         decimal? DiscountPrice,
-        ProductImage? ImageUrl
+        string? ImageUrl    
     );
 }
