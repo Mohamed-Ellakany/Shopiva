@@ -95,5 +95,40 @@ namespace Shopiva.Seeding
                 ("mohamed.ibrahim", 3, "Skincare Tubes - Orange", "Natural skincare products in eco-friendly tubes. Organic ingredients for healthy and radiant skin.", 49.99m, 39.99m, 120)
             };
         }
+
+        /// <summary>
+        /// Gets product images data with relative paths
+        /// </summary>
+        public static List<(string productName, string imagePath, bool isMain)> GetProductImagesData()
+        {
+            return new List<(string, string, bool)>
+            {
+                // Electronics
+                ("Smart Watch - Black", "/uploads/products/smartwatch-black.jpg", true),
+                ("Smart Watch - White", "/uploads/products/smartwatch-white.jpg", true),
+                ("DSLR Camera", "/uploads/products/camera-dslr.jpg", true),
+                ("Polaroid Camera", "/uploads/products/camera-polaroid.jpg", true),
+                ("Wireless Headphones - Black", "/uploads/products/headphones-black-yellow.jpg", true),
+
+                // Clothing
+                ("Sneaker - Black", "/uploads/products/sneaker-black.jpg", true),
+                ("Nike Red Sneaker", "/uploads/products/sneaker-nike-red.jpg", true),
+                ("High Heels - Floral", "/uploads/products/high-heels-floral.jpg", true),
+
+                // Accessories
+                ("Sunglasses - Black", "/uploads/products/sunglasses-black.jpg", true),
+                ("Sunglasses - Gold", "/uploads/products/sunglasses-gold.jpg", true),
+                ("Vintage Watch", "/uploads/products/watch-vintage.jpg", true),
+                ("Water Bottle - Green", "/uploads/products/water-bottle-green.jpg", true),
+
+                // Toys
+                ("Toy Car - Yellow", "/uploads/products/car-toy-yellow.jpg", true),
+                ("Bicycle - Black", "/uploads/products/bicycle-black.jpg", true),
+
+                // Skincare
+                ("Skincare Bottles Set", "/uploads/products/skincare-bottles-stacked.jpg", true),
+                ("Skincare Tubes - Orange", "/uploads/products/skincare-tubes-orange.jpg", true)
+            };
+        }
     }
 }
