@@ -124,5 +124,6 @@ namespace Shopiva.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PromoCode> PromoCodes { get; set; }
         public DbSet<Banner> Banners { get; set; }
+
     }
 }
