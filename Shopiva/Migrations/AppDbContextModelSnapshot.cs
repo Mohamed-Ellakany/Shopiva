@@ -299,7 +299,7 @@ namespace Shopiva.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banners");
+                    b.ToTable("Banners", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.Cart", b =>
@@ -328,7 +328,7 @@ namespace Shopiva.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.CartItem", b =>
@@ -359,7 +359,7 @@ namespace Shopiva.Migrations
 
                     b.HasIndex("CartId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.Category", b =>
@@ -387,7 +387,7 @@ namespace Shopiva.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.Order", b =>
@@ -450,7 +450,7 @@ namespace Shopiva.Migrations
                     b.HasIndex("OrderNumber")
                         .IsUnique();
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.OrderItem", b =>
@@ -484,7 +484,7 @@ namespace Shopiva.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.OrderStatusHistory", b =>
@@ -512,7 +512,7 @@ namespace Shopiva.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderStatusHistories");
+                    b.ToTable("OrderStatusHistories", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.Payment", b =>
@@ -554,7 +554,7 @@ namespace Shopiva.Migrations
                     b.HasIndex("OrderId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.Product", b =>
@@ -608,7 +608,7 @@ namespace Shopiva.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.ProductImage", b =>
@@ -633,7 +633,7 @@ namespace Shopiva.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.PromoCode", b =>
@@ -667,7 +667,7 @@ namespace Shopiva.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PromoCodes");
+                    b.ToTable("PromoCodes", (string)null);
                 });
 
             modelBuilder.Entity("Shopiva.Models.Review", b =>
@@ -704,7 +704,7 @@ namespace Shopiva.Migrations
                     b.HasIndex("ProductId", "CustomerId")
                         .IsUnique();
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
