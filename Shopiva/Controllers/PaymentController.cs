@@ -1,114 +1,88 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System.Security.Claims;
-using Shopiva.Contracts.Payment;
-using Shopiva.Interfaces;
 
 namespace Shopiva.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class PaymentController : ControllerBase
     {
-        private readonly IPaymentService _paymentService;
+        private readonly IConfiguration _config;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(IConfiguration config)
         {
-            _paymentService = paymentService;
+            _config = config;
+            StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
         }
 
-        // POST api/payment/order
-        // Create order + COD payment
-        [HttpPost("order")]
-        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderWithPaymentRequest request)
+        // POST api/payment/create-intent
+        [HttpPost("create-intent")]
+        [Authorize]
+        public async Task<IActionResult> CreatePaymentIntent([FromBody] CreatePaymentIntentRequest request)
         {
             try
             {
-                var customerId = GetCustomerId();
-                var result = await _paymentService.CreateOrderWithPaymentAsync(customerId, request);
-                return CreatedAtAction(nameof(GetPaymentById), new { id = result.Payment.Id }, result);
+                var options = new PaymentIntentCreateOptions
+                {
+                    Amount = (long)(request.Amount * 100),
+                    Currency = "usd",
+                    AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                    {
+                        Enabled = true,
+                    },
+                    Metadata = new Dictionary<string, string>
+                    {
+                        { "orderId",    request.OrderId.ToString() },
+                        { "customerId", User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "" }
+                    }
+                };
+
+                var service = new PaymentIntentService();
+                var intent = await service.CreateAsync(options);
+
+                return Ok(new
+                {
+                    clientSecret = intent.ClientSecret,
+                    paymentIntentId = intent.Id,
+                    publishableKey = _config["Stripe:PublishableKey"]
+                });
             }
-            catch (InvalidOperationException ex)
+            catch (StripeException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
         }
 
-        // PUT api/payment/process
-        // Mark payment as paid (delivery collected cash)
-        [HttpPut("process")]
-        public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentRequest request)
+        // POST api/payment/webhook
+        [HttpPost("webhook")]
+        public async Task<IActionResult> Webhook()
         {
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             try
             {
-                var customerId = GetCustomerId();
-                var result = await _paymentService.ProcessPaymentAsync(customerId, request);
-                return Ok(result);
+                var stripeEvent = EventUtility.ParseEvent(json);
+                if (stripeEvent.Type == EventTypes.PaymentIntentSucceeded)
+                {
+                    var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                    Console.WriteLine($"Payment succeeded: {paymentIntent?.Id}");
+                }
+                return Ok();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
+            catch (StripeException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
         }
 
-        // PUT api/payment/refund
-        // Refund a paid order
-        [HttpPut("refund")]
-        public async Task<IActionResult> RefundPayment([FromBody] RefundPaymentRequest request)
+        // GET api/payment/config
+        [HttpGet("config")]
+        public IActionResult GetConfig()
         {
-            try
-            {
-                var customerId = GetCustomerId();
-                var result = await _paymentService.RefundPaymentAsync(customerId, request);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        // GET api/payment/history?page=1&pageSize=10
-        [HttpGet("history")]
-        public async Task<IActionResult> GetPaymentHistory([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            var customerId = GetCustomerId();
-            var result = await _paymentService.GetPaymentHistoryAsync(customerId, page, pageSize);
-            return Ok(result);
-        }
-
-        // GET api/payment/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPaymentById(int id)
-        {
-            try
-            {
-                var customerId = GetCustomerId();
-                var result = await _paymentService.GetPaymentByIdAsync(customerId, id);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-        }
-
-        // ────────────────────────────────────────────
-        private string GetCustomerId()
-        {
-            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(id))
-                throw new UnauthorizedAccessException("User not authenticated.");
-            return id;
+            return Ok(new { publishableKey = _config["Stripe:PublishableKey"] });
         }
     }
+
+    public record CreatePaymentIntentRequest(int OrderId, decimal Amount);
 }
