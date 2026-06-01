@@ -10,13 +10,14 @@ namespace Shopiva.Repository
 
         public async Task<Cart?> GetActiveCartWithItemsAsync(string userId, CancellationToken ct = default)
         {
-            return await Query(noTracking: true).Include(c=>c.Items).FirstOrDefaultAsync(c => c.UserId == userId && c.Status == CartStatus.Active, ct);
+            return await Query(noTracking: true).Include(c=>c.Items).ThenInclude(p => p.Product).FirstOrDefaultAsync(c => c.UserId == userId && c.Status == CartStatus.Active, ct);
         }
 
         public async Task<Cart?> GetActiveCartWithItemsTrackedAsync(string userId, CancellationToken ct = default)
         { 
             return await Query(noTracking: false)          // ← EF tracks everything
                         .Include(c => c.Items)
+                        .ThenInclude(p=>p.Product)
                         .FirstOrDefaultAsync(c => c.UserId == userId && c.Status == CartStatus.Active, ct);
         }
 

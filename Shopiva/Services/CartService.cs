@@ -64,6 +64,7 @@ namespace Shopiva.Services
                     CartId = cart.Id,
                     ProductId = dto.ProductId,
                     Quantity = dto.Quantity,
+                    UnitPrice = dto.UnitPrice
                 });
             }
 
@@ -149,7 +150,13 @@ namespace Shopiva.Services
             cart.Status,
             cart.Items.Select(i => new CartItemDto(
                 i.Id,
-                i.ProductId,
+                new ProductCartDto(
+                    i.Product.Id,
+                    i.Product.Name,
+                    i.Product.Price,
+                    i.Product.DiscountedPrice,
+                    i.Product.Images?.FirstOrDefault()
+                ),
                 i.Quantity,
                 i.UnitPrice,
                 i.Quantity * i.UnitPrice
