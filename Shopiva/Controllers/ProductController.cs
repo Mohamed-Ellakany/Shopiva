@@ -23,7 +23,7 @@
 
         [HttpPost]
         [Authorize(Roles = "Seller,Admin")]
-        public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
+        public async Task<IActionResult> Create([FromForm] CreateProductDto dto)
         {
             var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var result = await _productService.CreateAsync(dto, sellerId);
@@ -34,7 +34,7 @@
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Seller,Admin")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto dto)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto)
         {
             var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var result = await _productService.UpdateAsync(id, dto, sellerId);
